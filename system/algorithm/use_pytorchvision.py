@@ -18,16 +18,18 @@ if __name__ == "__main__":
     for epoch in range(100):
         model.train()
 
+        total_loss = 0
+        total_sample = 0
+
         for x, y in loader:
+            total_sample += 1
             x = x.unsqueeze(1)
             pred = model(x)
             loss = criterion(pred, y)
-            print("当前循环为第%d轮， 误差为：%f", epoch, loss.item())
+            total_loss += loss
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-
-
-
+        print("当前循环为第%d轮， 误差为：%.3f" % (epoch, total_loss / total_sample))
