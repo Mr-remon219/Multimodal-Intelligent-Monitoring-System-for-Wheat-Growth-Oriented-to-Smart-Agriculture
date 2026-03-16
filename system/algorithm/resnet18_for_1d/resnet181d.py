@@ -50,7 +50,7 @@ class ResNet181D(nn.Module):
         super().__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
-        self.conv1 = nn.Conv1d(in_channels=in_channels, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=in_channels, out_channels=64, kernel_size=7, stride=1, padding=3)
         self.bn1 = nn.BatchNorm1d(64)
         self.maxpool = nn.MaxPool1d(kernel_size=3, stride=2, padding=1)
         self.layer1 = BasicBlock1D(in_channels=64, out_channels=64, process=False)

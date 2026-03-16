@@ -3,13 +3,22 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 
-file_path = r"cropdata_updated.csv"
+file_path = "cropdata_updated.csv"
+str_process = 3
+
+def data_init():
+    df = pd.read_csv(file_path)
+    for i in range(str_process):
+        value, keys = pd.factorize(df[df.columns[i]])
+        df[df.columns[i]] = value
+    df = df.drop(df[df["result"] == 2].index)
+    return df
 
 class WheatDataset(Dataset):
     def __init__(self):
         super().__init__()
-        self.file = pd.read_csv(file_path)
-        self.feature = self.file.iloc[:, 3 : -1].to_numpy(dtype=np.float32)
+        self.file = data_init()
+        self.feature = self.file.iloc[:, : -1].to_numpy(dtype=np.float32)
         self.label = self.file.iloc[:,  -1].to_numpy(dtype=np.long)
 
     def __len__(self):
