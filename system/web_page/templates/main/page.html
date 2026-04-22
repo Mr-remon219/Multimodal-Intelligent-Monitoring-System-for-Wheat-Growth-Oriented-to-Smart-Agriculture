@@ -13,6 +13,8 @@
             defer
             data-predict-simple-url="{% url 'predict_simple_api' %}"
             data-predict-batch-url="{% url 'predict_batch_api' %}"
+            data-sensor-latest-url="{% url 'latest_sensor_prediction_api' %}"
+            data-sensor-stream-url="{% url 'sensor_prediction_stream_api' %}"
         ></script>
     </head>
     <body>
@@ -85,6 +87,27 @@
                         </table>
                     </div>
                 </article>
+            </section>
+
+            <section class="module-card sensor-live-card">
+                <div class="module-head">
+                    <h2>传感器上传数据预测</h2>
+                </div>
+                <p class="module-desc">接收最新上传数据后自动刷新展示，左侧为上传数据，右侧为分析结果。</p>
+
+                <div id="sensor-live-empty" class="sensor-live-empty">暂无数据上传</div>
+
+                <div id="sensor-live-content" class="sensor-live-content hidden">
+                    <div class="sensor-live-left">
+                        <h3>上传数据</h3>
+                        <ul id="sensor-live-data-list"></ul>
+                    </div>
+                    <div class="sensor-live-right">
+                        <h3>分析结果</h3>
+                        <div id="sensor-live-result" class="sensor-live-result neutral">等待分析</div>
+                        <p id="sensor-live-time" class="sensor-live-time"></p>
+                    </div>
+                </div>
             </section>
 
             <section class="bottom-note">

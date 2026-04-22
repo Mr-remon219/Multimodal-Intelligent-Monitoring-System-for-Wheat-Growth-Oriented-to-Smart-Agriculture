@@ -45,3 +45,30 @@ def insert_user_sensor_record(user_id, payload):
         )
         row_id = cursor.lastrowid
     return table_name, row_id
+
+
+def fetch_latest_user_sensor_record(user_id):
+    table_name = ensure_user_sensor_table(user_id)
+    query_sql = f"""
+    SELECT id, soil_type, seedling_stage, moi, temp, humidity, created_at
+    FROM "{table_name}"
+    ORDER BY id DESC
+    LIMIT 1
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query_sql)
+        row = cursor.fetchone()
+
+    if not row:
+        return None
+
+    return {
+        "id": int(row[0]),
+        "soil_type": row[1],
+        "seedling_stage": row[2],
+        "MOI": float(row[3]),
+        "temp": float(row[4]),
+        "humidity": float(row[5]),
+        "created_at": row[6],
+    }

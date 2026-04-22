@@ -23,6 +23,10 @@
     box-sizing: border-box;
 }
 
+.hidden {
+    display: none !important;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -459,6 +463,102 @@ body {
     gap: 10px;
 }
 
+.sensor-live-card {
+    margin-top: 18px;
+    min-height: 280px;
+}
+
+.sensor-live-empty {
+    margin-top: 14px;
+    min-height: 160px;
+    border: 1px dashed #c5d9cf;
+    border-radius: 12px;
+    background: #f8fcfa;
+    color: #577365;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.sensor-live-content {
+    margin-top: 14px;
+    display: flex;
+    border: 1px solid #d6e2db;
+    border-radius: 12px;
+    background: #fbfdfc;
+    min-height: 200px;
+}
+
+.sensor-live-left {
+    flex: 0 0 80%;
+    max-width: 80%;
+    padding: 14px;
+    border-right: 1px solid #d6e2db;
+}
+
+.sensor-live-right {
+    flex: 0 0 20%;
+    max-width: 20%;
+    min-width: 160px;
+    padding: 14px;
+}
+
+.sensor-live-left h3,
+.sensor-live-right h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #214b3c;
+}
+
+.sensor-live-left ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #355c4d;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+.sensor-live-result {
+    border-radius: 10px;
+    border: 1px solid #d8e2dc;
+    background: #f3f6f4;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.sensor-live-result.warn {
+    border-color: var(--warn-border);
+    background: var(--warn-bg);
+    color: #9b4f06;
+}
+
+.sensor-live-result.ok {
+    border-color: var(--ok-border);
+    background: var(--ok-bg);
+    color: #1a6544;
+}
+
+.sensor-live-result.error {
+    border-color: var(--danger-border);
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.sensor-live-result.neutral {
+    border-color: var(--neutral-border);
+    background: var(--neutral-bg);
+    color: #3b5f50;
+}
+
+.sensor-live-time {
+    margin: 10px 0 0;
+    color: #5b786a;
+    font-size: 12px;
+}
+
 .bottom-note {
     margin-top: 16px;
     text-align: center;
@@ -505,5 +605,21 @@ body {
 
     .form-actions {
         flex-direction: column-reverse;
+    }
+
+    .sensor-live-content {
+        flex-direction: column;
+    }
+
+    .sensor-live-left,
+    .sensor-live-right {
+        max-width: 100%;
+        flex-basis: auto;
+        min-width: 0;
+    }
+
+    .sensor-live-left {
+        border-right: 0;
+        border-bottom: 1px solid #d6e2db;
     }
 }

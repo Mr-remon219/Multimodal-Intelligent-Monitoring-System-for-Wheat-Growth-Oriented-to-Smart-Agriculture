@@ -1,10 +1,12 @@
 import csv
 import io
 import json
+import time
 
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
+from ...sensor_storage import fetch_latest_user_sensor_record
 
 SOIL_OPTIONS = {"黑土地", "河淤土", "沙土地", "红泥巴土", "黏泥巴"}
 SEEDLING_STAGE_OPTIONS = {"发芽", "长根", "青麦", "授粉", "变黄", "逐渐成熟", "收割"}
@@ -55,6 +57,40 @@ def _normalize_csv_row(raw_row):
             continue
         normalized[canonical_key] = str(raw_value).strip() if raw_value is not None else ""
     return normalized
+
+
+def _build_latest_sensor_prediction_payload(login_user_id):
+    latest_record = fetch_latest_user_sensor_record(login_user_id)
+    if latest_record is None:
+        return {"ok": True, "has_data": False, "message": "暂无数据上传"}
+
+    payload = {
+        "soil_type": latest_record["soil_type"],
+        "seedling_stage": latest_record["seedling_stage"],
+        "MOI": latest_record["MOI"],
+        "temp": latest_record["temp"],
+        "humidity": latest_record["humidity"],
+    }
+
+    from algorithm.predict import predict_from_request_for_simple
+
+    prediction = int(predict_from_request_for_simple(payload))
+    analysis_text = "需要灌溉" if prediction == 1 else "一切正常"
+    return {
+        "ok": True,
+        "has_data": True,
+        "record_id": latest_record["id"],
+        "uploaded_at": latest_record["created_at"],
+        "display_data": {
+            "土壤类型": latest_record["soil_type"],
+            "生长周期": latest_record["seedling_stage"],
+            "种植密度": latest_record["MOI"],
+            "温度": latest_record["temp"],
+            "湿度": latest_record["humidity"],
+        },
+        "analysis_result": prediction,
+        "analysis_text": analysis_text,
+    }
 
 
 @require_http_methods(["GET"])
@@ -231,3 +267,71 @@ def predict_batch_api(request):
             "errors": errors,
         }
     )
+
+
+@require_http_methods(["GET"])
+def latest_sensor_prediction_api(request):
+    login_user_id = request.session.get("login_user_id")
+    if not login_user_id:
+        return JsonResponse({"ok": False, "message": "登录状态已失效，请重新登录。"}, status=401)
+
+    try:
+        payload = _build_latest_sensor_prediction_payload(login_user_id)
+    except ImportError:
+        return JsonResponse({"ok": False, "message": "预测依赖未安装（请检查 torch）。"}, status=500)
+    except Exception:
+        return JsonResponse({"ok": False, "message": "读取或预测失败，请稍后重试。"}, status=500)
+
+    return JsonResponse(payload)
+
+
+@require_http_methods(["GET"])
+def sensor_prediction_stream_api(request):
+    login_user_id = request.session.get("login_user_id")
+    if not login_user_id:
+        return JsonResponse({"ok": False, "message": "登录状态已失效，请重新登录。"}, status=401)
+
+    last_event_id_raw = request.META.get("HTTP_LAST_EVENT_ID")
+    try:
+        last_event_id = int(last_event_id_raw) if last_event_id_raw else None
+    except ValueError:
+        last_event_id = None
+
+    def event_stream():
+        nonlocal last_event_id
+        sent_empty = False
+
+        while True:
+            try:
+                payload = _build_latest_sensor_prediction_payload(login_user_id)
+            except ImportError:
+                error_payload = {"ok": False, "message": "预测依赖未安装（请检查 torch）。"}
+                yield f"event: error\ndata: {json.dumps(error_payload, ensure_ascii=False)}\n\n"
+                break
+            except Exception:
+                error_payload = {"ok": False, "message": "读取或预测失败，请稍后重试。"}
+                yield f"event: error\ndata: {json.dumps(error_payload, ensure_ascii=False)}\n\n"
+                time.sleep(2)
+                continue
+
+            if not payload.get("has_data"):
+                if not sent_empty:
+                    sent_empty = True
+                    yield f"event: sensor_update\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+            else:
+                sent_empty = False
+                current_id = int(payload.get("record_id", 0))
+                if last_event_id is None or current_id > last_event_id:
+                    last_event_id = current_id
+                    yield (
+                        f"id: {current_id}\n"
+                        f"event: sensor_update\n"
+                        f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+                    )
+
+            time.sleep(1)
+
+    response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+    response["Cache-Control"] = "no-cache"
+    response["X-Accel-Buffering"] = "no"
+    return response

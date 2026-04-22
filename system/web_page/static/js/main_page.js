@@ -2,6 +2,8 @@
     const script = document.querySelector("script[data-predict-simple-url]");
     const simplePredictUrl = script?.dataset.predictSimpleUrl;
     const batchPredictUrl = script?.dataset.predictBatchUrl;
+    const sensorLatestUrl = script?.dataset.sensorLatestUrl;
+    const sensorStreamUrl = script?.dataset.sensorStreamUrl;
     if (!simplePredictUrl) return;
 
     const openBtn = document.getElementById("open-simple-modal");
@@ -19,6 +21,11 @@
     const batchErrorBox = document.getElementById("batch-error-box");
     const batchTableWrapper = document.getElementById("batch-table-wrapper");
     const batchTableBody = document.getElementById("batch-table-body");
+    const sensorLiveEmpty = document.getElementById("sensor-live-empty");
+    const sensorLiveContent = document.getElementById("sensor-live-content");
+    const sensorLiveDataList = document.getElementById("sensor-live-data-list");
+    const sensorLiveResult = document.getElementById("sensor-live-result");
+    const sensorLiveTime = document.getElementById("sensor-live-time");
 
     if (
         !openBtn ||
@@ -39,6 +46,16 @@
     ) {
         return;
     }
+
+    const hasSensorModule =
+        !!sensorLatestUrl &&
+        !!sensorStreamUrl &&
+        !!sensorLiveEmpty &&
+        !!sensorLiveContent &&
+        !!sensorLiveDataList &&
+        !!sensorLiveResult &&
+        !!sensorLiveTime;
+    let lastSensorRecordId = null;
 
     const setResult = (text, state) => {
         resultPanel.textContent = text;
@@ -77,6 +94,107 @@
         const more = errors.length > previewErrors.length ? `\n... 另外 ${errors.length - previewErrors.length} 条错误` : "";
         batchErrorBox.textContent = `${text}${more}`;
         batchErrorBox.classList.add("show");
+    };
+
+    const setSensorNoData = (text = "暂无数据上传") => {
+        if (!hasSensorModule) return;
+        sensorLiveDataList.innerHTML = "";
+        sensorLiveResult.textContent = "等待分析";
+        sensorLiveResult.classList.remove("ok", "warn", "error", "neutral");
+        sensorLiveResult.classList.add("neutral");
+        sensorLiveTime.textContent = "";
+        sensorLiveContent.classList.add("hidden");
+        sensorLiveEmpty.classList.remove("hidden");
+        sensorLiveEmpty.textContent = text;
+    };
+
+    const renderSensorLive = (payload) => {
+        if (!hasSensorModule) return;
+
+        const displayData = payload.display_data || {};
+        sensorLiveDataList.innerHTML = "";
+        for (const [key, value] of Object.entries(displayData)) {
+            const li = document.createElement("li");
+            li.textContent = `${key}：${value}`;
+            sensorLiveDataList.appendChild(li);
+        }
+
+        sensorLiveResult.classList.remove("ok", "warn", "error", "neutral");
+        if (payload.analysis_result === 1) {
+            sensorLiveResult.classList.add("warn");
+        } else if (payload.analysis_result === 0) {
+            sensorLiveResult.classList.add("ok");
+        } else {
+            sensorLiveResult.classList.add("neutral");
+        }
+        sensorLiveResult.textContent = payload.analysis_text || "暂无分析结果";
+        sensorLiveTime.textContent = payload.uploaded_at ? `上传时间：${payload.uploaded_at}` : "";
+
+        sensorLiveEmpty.classList.add("hidden");
+        sensorLiveContent.classList.remove("hidden");
+    };
+
+    const refreshSensorLiveOnce = async (force = false) => {
+        if (!hasSensorModule) return;
+
+        try {
+            const response = await fetch(sensorLatestUrl, { method: "GET" });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                return;
+            }
+
+            if (!data.has_data) {
+                lastSensorRecordId = null;
+                setSensorNoData("暂无数据上传");
+                return;
+            }
+
+            const recordId = Number(data.record_id);
+            if (force || recordId !== lastSensorRecordId) {
+                lastSensorRecordId = recordId;
+                renderSensorLive(data);
+            }
+        } catch (error) {
+            if (lastSensorRecordId === null) {
+                setSensorNoData("暂无数据上传");
+            }
+        }
+    };
+
+    const connectSensorStream = () => {
+        if (!hasSensorModule) return null;
+        if (typeof EventSource === "undefined") return null;
+
+        const source = new EventSource(sensorStreamUrl);
+
+        source.addEventListener("sensor_update", (event) => {
+            try {
+                const payload = JSON.parse(event.data);
+                if (!payload.ok) return;
+
+                if (!payload.has_data) {
+                    lastSensorRecordId = null;
+                    setSensorNoData("暂无数据上传");
+                    return;
+                }
+
+                const currentId = Number(payload.record_id);
+                if (!Number.isFinite(currentId)) return;
+                if (lastSensorRecordId === null || currentId > lastSensorRecordId) {
+                    lastSensorRecordId = currentId;
+                    renderSensorLive(payload);
+                }
+            } catch (error) {
+                // ignore malformed event
+            }
+        });
+
+        source.addEventListener("error", () => {
+            // Let EventSource auto-reconnect; no manual timer refresh.
+        });
+
+        return source;
     };
 
     const escapeHtml = (value) =>
@@ -291,5 +409,11 @@
                 batchSubmitBtn.textContent = "上传并预测";
             }
         });
+    }
+
+    if (hasSensorModule) {
+        setSensorNoData("暂无数据上传");
+        refreshSensorLiveOnce(true);
+        connectSensorStream();
     }
 })();
