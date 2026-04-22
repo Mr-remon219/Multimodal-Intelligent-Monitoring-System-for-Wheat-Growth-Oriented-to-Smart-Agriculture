@@ -5,15 +5,21 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="csrf-token" content="{{ csrf_token }}" />
         <title>小麦生长智能监测系统</title>
-        <link rel="stylesheet" href="{% static 'css/page.css' %}">
+        <link rel="stylesheet" href="{% static 'css/page.css' %}" />
+        <script
+            src="{% static 'js/main_page.js' %}"
+            defer
+            data-predict-url="{% url 'predict_simple_api' %}"
+        ></script>
     </head>
     <body>
         <header class="topbar">
             <div class="topbar-inner">
                 <div class="left-group">
                     <a class="brand" href="{% url 'main_page' %}">小麦生长智能监测系统</a>
-                    <a class="nav-link" href="#">监控</a>
+                    <span class="nav-link nav-muted">智能灌溉决策模块</span>
                 </div>
                 <div class="right-group">
                     {% if login_user_name %}
@@ -25,8 +31,102 @@
         </header>
 
         <main class="container">
-            <section class="frame"></section>
+            <section class="hero">
+                <h1>小麦生长预测中心</h1>
+                <p>支持单样本快速预测，并预留多样本批处理能力，便于后续扩展。</p>
+            </section>
+
+            <section class="module-grid">
+                <article class="module-card primary-card">
+                    <div class="module-head">
+                        <h2>单样本预测</h2>
+                        <button id="open-simple-modal" class="action-btn" type="button">开始预测</button>
+                    </div>
+                    <p class="module-desc">
+                        通过土壤类型、生长周期、种植密度、温度、湿度 5 个字段，实时生成预测结果。
+                    </p>
+                    <div id="simple-result" class="result-panel neutral">尚未预测，请点击“开始预测”。</div>
+                    <div class="request-box">
+                        <h3>最近一次 request 报文</h3>
+                        <pre id="request-preview" class="request-preview">暂无</pre>
+                    </div>
+                </article>
+
+                <article class="module-card placeholder-card">
+                    <h2>多样本预测（预留）</h2>
+                    <p class="module-desc">
+                        预留用于后续批量上传样本（CSV/Excel）并进行集中预测展示。
+                    </p>
+                    <div class="placeholder-box">待开发：批量导入、批量预测、结果导出</div>
+                </article>
+            </section>
         </main>
+
+        <div id="simple-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-mask" data-close-modal="true"></div>
+            <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="simple-modal-title">
+                <button id="close-simple-modal" class="close-btn" type="button" aria-label="关闭弹窗">×</button>
+                <h2 id="simple-modal-title">单样本预测</h2>
+                <p class="modal-tip">请填写以下 5 项参数，系统将生成 request 报文并调用后端预测。</p>
+
+                <p id="simple-form-message" class="form-message"></p>
+
+                <form id="simple-form" class="simple-form" novalidate>
+                    <div class="field-group">
+                        <label for="soil_type">土壤（soil_type）</label>
+                        <select id="soil_type" name="soil_type" required>
+                            <option value="" selected disabled>请选择土壤类型</option>
+                            <option value="黑土地">黑土地</option>
+                            <option value="河淤土">河淤土</option>
+                            <option value="沙土地">沙土地</option>
+                            <option value="红泥巴土">红泥巴土</option>
+                            <option value="黏泥巴">黏泥巴</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="seedling_stage">生长周期（seedling_stage）</label>
+                        <select id="seedling_stage" name="seedling_stage" required>
+                            <option value="" selected disabled>请选择生长周期</option>
+                            <option value="发芽">发芽</option>
+                            <option value="长根">长根</option>
+                            <option value="青麦">青麦</option>
+                            <option value="授粉">授粉</option>
+                            <option value="变黄">变黄</option>
+                            <option value="逐渐成熟">逐渐成熟</option>
+                            <option value="收割">收割</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="MOI">种植密度（MOI）</label>
+                        <input id="MOI" name="MOI" type="number" step="any" placeholder="例如：12.5" required />
+                    </div>
+
+                    <div class="field-group">
+                        <label for="temp">温度（temp）</label>
+                        <input id="temp" name="temp" type="number" step="any" placeholder="例如：26.4" required />
+                    </div>
+
+                    <div class="field-group">
+                        <label for="humidity">湿度（humidity）</label>
+                        <input
+                            id="humidity"
+                            name="humidity"
+                            type="number"
+                            step="any"
+                            placeholder="例如：71.8"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-actions">
+                        <button id="cancel-simple-submit" class="ghost-btn" type="button">取消</button>
+                        <button id="submit-simple-form" class="action-btn" type="submit">提交预测</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </body>
 </html>
 
