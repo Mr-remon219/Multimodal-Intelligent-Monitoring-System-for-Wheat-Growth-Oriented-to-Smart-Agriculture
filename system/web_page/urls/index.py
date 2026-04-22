@@ -1,8 +1,9 @@
 from django.urls import path, include
-from web_page.views.index import index
+from web_page.views.index import index, TestView
 
 urlpatterns = [
         path("", index, name="index"),
-        path("menu/", include("web_page.urls.menu.index")),
+        path("log/", include("web_page.urls.log.index")),
         path("settings/", include("web_page.urls.settings.index")),
+        path("main/", include("web_page.urls.main.index")),
         ]
