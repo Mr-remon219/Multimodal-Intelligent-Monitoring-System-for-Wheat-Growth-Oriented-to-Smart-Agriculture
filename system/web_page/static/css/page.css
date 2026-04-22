@@ -305,6 +305,27 @@ body {
     display: none;
 }
 
+.batch-pagination {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.batch-page-btn {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
+}
+
+.batch-page-info {
+    min-width: 170px;
+    text-align: center;
+    font-size: 13px;
+    color: #365b4c;
+}
+
 .batch-table {
     width: 100%;
     border-collapse: collapse;
@@ -616,6 +637,15 @@ body {
 
     .form-actions {
         flex-direction: column-reverse;
+    }
+
+    .batch-pagination {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .batch-page-info {
+        min-width: 0;
     }
 
     .sensor-live-content {

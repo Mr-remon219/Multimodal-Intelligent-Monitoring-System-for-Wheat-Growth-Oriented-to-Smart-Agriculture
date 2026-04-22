@@ -21,6 +21,10 @@
     const batchErrorBox = document.getElementById("batch-error-box");
     const batchTableWrapper = document.getElementById("batch-table-wrapper");
     const batchTableBody = document.getElementById("batch-table-body");
+    const batchPagination = document.getElementById("batch-pagination");
+    const batchPrevPageBtn = document.getElementById("batch-prev-page");
+    const batchNextPageBtn = document.getElementById("batch-next-page");
+    const batchPageInfo = document.getElementById("batch-page-info");
     const sensorLiveEmpty = document.getElementById("sensor-live-empty");
     const sensorLiveContent = document.getElementById("sensor-live-content");
     const sensorLiveDataList = document.getElementById("sensor-live-data-list");
@@ -42,10 +46,18 @@
         !batchSummary ||
         !batchErrorBox ||
         !batchTableWrapper ||
-        !batchTableBody
+        !batchTableBody ||
+        !batchPagination ||
+        !batchPrevPageBtn ||
+        !batchNextPageBtn ||
+        !batchPageInfo
     ) {
         return;
     }
+
+    const BATCH_PAGE_SIZE = 10;
+    let batchResults = [];
+    let batchCurrentPage = 1;
 
     const hasSensorModule =
         !!sensorLatestUrl &&
@@ -227,15 +239,39 @@
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#39;");
 
-    const renderBatchTable = (rows) => {
-        if (!Array.isArray(rows) || rows.length === 0) {
-            batchTableBody.innerHTML = "";
-            batchTableWrapper.classList.add("hidden");
+    const getBatchTotalPages = () => {
+        return Math.max(1, Math.ceil(batchResults.length / BATCH_PAGE_SIZE));
+    };
+
+    const updateBatchPagination = () => {
+        if (batchResults.length === 0) {
+            batchPagination.classList.add("hidden");
             return;
         }
 
-        const maxRenderRows = 500;
-        const renderRows = rows.slice(0, maxRenderRows);
+        const totalPages = getBatchTotalPages();
+        batchPageInfo.textContent = `第 ${batchCurrentPage} / ${totalPages} 页（每页 ${BATCH_PAGE_SIZE} 条）`;
+        batchPrevPageBtn.disabled = batchCurrentPage <= 1;
+        batchNextPageBtn.disabled = batchCurrentPage >= totalPages;
+        batchPagination.classList.remove("hidden");
+    };
+
+    const renderBatchTablePage = () => {
+        if (batchResults.length === 0) {
+            batchTableBody.innerHTML = "";
+            batchTableWrapper.classList.add("hidden");
+            batchPagination.classList.add("hidden");
+            return;
+        }
+
+        const totalPages = getBatchTotalPages();
+        if (batchCurrentPage > totalPages) {
+            batchCurrentPage = totalPages;
+        }
+
+        const start = (batchCurrentPage - 1) * BATCH_PAGE_SIZE;
+        const end = start + BATCH_PAGE_SIZE;
+        const renderRows = batchResults.slice(start, end);
         const html = renderRows
             .map((item) => {
                 const tagClass = item.result === 1 ? "warn" : "ok";
@@ -255,10 +291,13 @@
 
         batchTableBody.innerHTML = html;
         batchTableWrapper.classList.remove("hidden");
-        if (rows.length > maxRenderRows) {
-            batchErrorBox.textContent = `结果行较多，仅展示前 ${maxRenderRows} 条，完整统计已在汇总中给出。`;
-            batchErrorBox.classList.add("show");
-        }
+        updateBatchPagination();
+    };
+
+    const renderBatchTable = (rows) => {
+        batchResults = Array.isArray(rows) ? rows : [];
+        batchCurrentPage = 1;
+        renderBatchTablePage();
     };
 
     const openModal = () => {
@@ -312,6 +351,19 @@
         if (event.key === "Escape" && !modal.classList.contains("hidden")) {
             closeModal();
         }
+    });
+
+    batchPrevPageBtn.addEventListener("click", () => {
+        if (batchCurrentPage <= 1) return;
+        batchCurrentPage -= 1;
+        renderBatchTablePage();
+    });
+
+    batchNextPageBtn.addEventListener("click", () => {
+        const totalPages = getBatchTotalPages();
+        if (batchCurrentPage >= totalPages) return;
+        batchCurrentPage += 1;
+        renderBatchTablePage();
     });
 
     form.addEventListener("submit", async (event) => {
