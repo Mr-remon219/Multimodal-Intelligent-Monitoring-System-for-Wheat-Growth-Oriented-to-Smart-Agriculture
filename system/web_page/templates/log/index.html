@@ -1,0 +1,48 @@
+{% load static %}
+
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>用户登录 - 小麦生长智能监测系统</title>
+        <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+    </head>
+    <body>
+        <main class="login-page">
+            <section class="login-card">
+                <h1 class="title">小麦生长智能监测系统</h1>
+                <p class="subtitle">用户登录</p>
+
+                {% if error %}
+                <p class="error">{{ error }}</p>
+                {% endif %}
+
+                <form method="post" action="" class="login-form">
+                    {% csrf_token %}
+
+                    <label for="username">用户名</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        maxlength="20"
+                        value="{{ username|default:'' }}"
+                        required
+                    />
+
+                    <label for="password">密码</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        maxlength="20"
+                        required
+                    />
+
+                    <button type="submit">登录</button>
+                </form>
+            </section>
+        </main>
+    </body>
+</html>

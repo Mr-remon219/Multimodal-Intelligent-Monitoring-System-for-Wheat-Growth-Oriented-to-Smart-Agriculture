@@ -1,3 +1,6 @@
-from django.urls import path, include
+from django.urls import path
+from web_page.views.log.views import index
 
-urlpatterns = []
+urlpatterns = [
+    path("", index, name="log_index"),
+]

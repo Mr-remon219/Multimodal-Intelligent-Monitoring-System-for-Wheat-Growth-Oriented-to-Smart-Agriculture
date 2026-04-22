@@ -12,12 +12,14 @@
         <header class="topbar">
             <div class="topbar-inner">
                 <div class="left-group">
-                    <a class="brand" href="#">小麦生长智能监测系统</a>
+                    <a class="brand" href="{% url 'main_page' %}">小麦生长智能监测系统</a>
                     <a class="nav-link" href="#">监控</a>
                 </div>
                 <div class="right-group">
-                    <a class="nav-link" href="#">用户登录</a>
-                    <a class="nav-link" href="#">注册</a>
+                    {% if login_user_name %}
+                    <span class="nav-link">当前用户：{{ login_user_name }}</span>
+                    {% endif %}
+                    <a class="nav-link" href="{% url 'log_index' %}">切换账号</a>
                 </div>
             </div>
         </header>

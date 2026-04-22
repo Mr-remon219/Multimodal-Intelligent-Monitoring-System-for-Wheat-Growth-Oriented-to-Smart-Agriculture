@@ -1,3 +1,6 @@
-from django.ruls import path, include
+from django.urls import path
+from web_page.views.main.views import index
 
-urlpatterns = []
+urlpatterns = [
+    path("", index, name="main_page"),
+]
