@@ -105,7 +105,29 @@
         sensorLiveTime.textContent = "";
         sensorLiveContent.classList.add("hidden");
         sensorLiveEmpty.classList.remove("hidden");
+        sensorLiveEmpty.classList.remove("compact");
         sensorLiveEmpty.textContent = text;
+    };
+
+    const renderSensorExample = (payload) => {
+        if (!hasSensorModule) return;
+        const displayData = payload.display_data || {};
+        sensorLiveDataList.innerHTML = "";
+        for (const [key, value] of Object.entries(displayData)) {
+            const li = document.createElement("li");
+            li.textContent = `${key}：${value}`;
+            sensorLiveDataList.appendChild(li);
+        }
+
+        sensorLiveResult.classList.remove("ok", "warn", "error", "neutral");
+        sensorLiveResult.classList.add("neutral");
+        sensorLiveResult.textContent = payload.analysis_text || "示例数据";
+        sensorLiveTime.textContent = "";
+
+        sensorLiveEmpty.classList.remove("hidden");
+        sensorLiveEmpty.classList.add("compact");
+        sensorLiveEmpty.textContent = payload.message || "示例：";
+        sensorLiveContent.classList.remove("hidden");
     };
 
     const renderSensorLive = (payload) => {
@@ -146,7 +168,7 @@
 
             if (!data.has_data) {
                 lastSensorRecordId = null;
-                setSensorNoData("暂无数据上传");
+                renderSensorExample(data);
                 return;
             }
 
@@ -175,7 +197,7 @@
 
                 if (!payload.has_data) {
                     lastSensorRecordId = null;
-                    setSensorNoData("暂无数据上传");
+                    renderSensorExample(payload);
                     return;
                 }
 
@@ -412,7 +434,7 @@
     }
 
     if (hasSensorModule) {
-        setSensorNoData("暂无数据上传");
+        setSensorNoData("示例：");
         refreshSensorLiveOnce(true);
         connectSensorStream();
     }

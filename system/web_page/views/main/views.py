@@ -2,6 +2,8 @@ import csv
 import io
 import json
 import time
+from functools import lru_cache
+from pathlib import Path
 
 from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
@@ -30,6 +32,23 @@ CSV_FIELD_ALIASES = {
 
 CSV_REQUIRED_FIELDS = {"soil_type", "seedling_stage", "MOI", "temp", "humidity"}
 CSV_MAX_ROWS = 2000
+EXAMPLE_SOIL_MAP = {
+    "Black Soil": "黑土地",
+    "Alluvial Soil": "河淤土",
+    "Sandy Soil": "沙土地",
+    "Red Soil": "红泥巴土",
+    "Clay Soil": "黏泥巴",
+}
+EXAMPLE_STAGE_MAP = {
+    "Germination": "发芽",
+    "Seedling Stage": "长根",
+    "Vegetative Growth / Root or Tuber Development": "青麦",
+    "Flowering": "授粉",
+    "Pollination": "授粉",
+    "Fruit/Grain/Bulb Formation": "变黄",
+    "Maturation": "逐渐成熟",
+    "Harvest": "收割",
+}
 
 
 def _decode_csv_bytes(file_bytes):
@@ -59,10 +78,76 @@ def _normalize_csv_row(raw_row):
     return normalized
 
 
+@lru_cache(maxsize=1)
+def _get_example_sensor_payload():
+    csv_path = Path(__file__).resolve().parents[3] / "algorithm" / "cropdata_updated.csv"
+    default_payload = {
+        "display_data": {
+            "土壤类型": "黑土地",
+            "生长周期": "发芽",
+            "种植密度": 1.0,
+            "温度": 25.0,
+            "湿度": 80.0,
+        },
+        "analysis_text": "示例数据",
+    }
+
+    try:
+        with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            first_row = next(reader, None)
+    except Exception:
+        return default_payload
+
+    if not first_row:
+        return default_payload
+
+    soil_raw = str(first_row.get("soil_type", "")).strip()
+    stage_raw = str(first_row.get("Seedling Stage", "")).strip()
+    moi_raw = str(first_row.get("MOI", "")).strip()
+    temp_raw = str(first_row.get("temp", "")).strip()
+    humidity_raw = str(first_row.get("humidity", "")).strip()
+    result_raw = str(first_row.get("result", "")).strip()
+
+    try:
+        moi = float(moi_raw)
+        temp = float(temp_raw)
+        humidity = float(humidity_raw)
+    except ValueError:
+        return default_payload
+
+    soil_zh = EXAMPLE_SOIL_MAP.get(soil_raw, soil_raw or "黑土地")
+    stage_zh = EXAMPLE_STAGE_MAP.get(stage_raw, stage_raw or "发芽")
+
+    analysis_text = "示例数据"
+    if result_raw == "1":
+        analysis_text = "需要灌溉（示例）"
+    elif result_raw == "0":
+        analysis_text = "一切正常（示例）"
+
+    return {
+        "display_data": {
+            "土壤类型": soil_zh,
+            "生长周期": stage_zh,
+            "种植密度": moi,
+            "温度": temp,
+            "湿度": humidity,
+        },
+        "analysis_text": analysis_text,
+    }
+
+
 def _build_latest_sensor_prediction_payload(login_user_id):
     latest_record = fetch_latest_user_sensor_record(login_user_id)
     if latest_record is None:
-        return {"ok": True, "has_data": False, "message": "暂无数据上传"}
+        example = _get_example_sensor_payload()
+        return {
+            "ok": True,
+            "has_data": False,
+            "message": "示例：",
+            "display_data": example["display_data"],
+            "analysis_text": example["analysis_text"],
+        }
 
     payload = {
         "soil_type": latest_record["soil_type"],

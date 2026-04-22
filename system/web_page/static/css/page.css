@@ -481,6 +481,17 @@ body {
     font-size: 15px;
 }
 
+.sensor-live-empty.compact {
+    min-height: auto;
+    border: 0;
+    background: transparent;
+    justify-content: flex-start;
+    padding: 0;
+    margin-top: 12px;
+    color: #32594a;
+    font-weight: 600;
+}
+
 .sensor-live-content {
     margin-top: 14px;
     display: flex;
