@@ -1,7 +1,8 @@
 (() => {
-    const script = document.querySelector("script[data-predict-url]");
-    const predictUrl = script?.dataset.predictUrl;
-    if (!predictUrl) return;
+    const script = document.querySelector("script[data-predict-simple-url]");
+    const simplePredictUrl = script?.dataset.predictSimpleUrl;
+    const batchPredictUrl = script?.dataset.predictBatchUrl;
+    if (!simplePredictUrl) return;
 
     const openBtn = document.getElementById("open-simple-modal");
     const closeBtn = document.getElementById("close-simple-modal");
@@ -12,6 +13,12 @@
     const formMessage = document.getElementById("simple-form-message");
     const submitBtn = document.getElementById("submit-simple-form");
     const requestPreview = document.getElementById("request-preview");
+    const batchInput = document.getElementById("batch-csv-input");
+    const batchSubmitBtn = document.getElementById("submit-batch");
+    const batchSummary = document.getElementById("batch-summary");
+    const batchErrorBox = document.getElementById("batch-error-box");
+    const batchTableWrapper = document.getElementById("batch-table-wrapper");
+    const batchTableBody = document.getElementById("batch-table-body");
 
     if (
         !openBtn ||
@@ -22,7 +29,13 @@
         !resultPanel ||
         !formMessage ||
         !submitBtn ||
-        !requestPreview
+        !requestPreview ||
+        !batchInput ||
+        !batchSubmitBtn ||
+        !batchSummary ||
+        !batchErrorBox ||
+        !batchTableWrapper ||
+        !batchTableBody
     ) {
         return;
     }
@@ -41,6 +54,70 @@
             if (state === "error") {
                 formMessage.classList.add("error");
             }
+        }
+    };
+
+    const setBatchSummary = (text, state) => {
+        batchSummary.textContent = text;
+        batchSummary.classList.remove("ok", "warn", "neutral", "error");
+        batchSummary.classList.add(state);
+    };
+
+    const setBatchErrors = (errors) => {
+        if (!Array.isArray(errors) || errors.length === 0) {
+            batchErrorBox.classList.remove("show");
+            batchErrorBox.textContent = "";
+            return;
+        }
+
+        const previewErrors = errors.slice(0, 10);
+        const text = previewErrors
+            .map((item) => `第 ${item.row} 行：${item.message}`)
+            .join("\n");
+        const more = errors.length > previewErrors.length ? `\n... 另外 ${errors.length - previewErrors.length} 条错误` : "";
+        batchErrorBox.textContent = `${text}${more}`;
+        batchErrorBox.classList.add("show");
+    };
+
+    const escapeHtml = (value) =>
+        String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+
+    const renderBatchTable = (rows) => {
+        if (!Array.isArray(rows) || rows.length === 0) {
+            batchTableBody.innerHTML = "";
+            batchTableWrapper.classList.add("hidden");
+            return;
+        }
+
+        const maxRenderRows = 500;
+        const renderRows = rows.slice(0, maxRenderRows);
+        const html = renderRows
+            .map((item) => {
+                const tagClass = item.result === 1 ? "warn" : "ok";
+                return `
+                    <tr>
+                        <td>${escapeHtml(item.row)}</td>
+                        <td>${escapeHtml(item.soil_type)}</td>
+                        <td>${escapeHtml(item.seedling_stage)}</td>
+                        <td>${escapeHtml(item.MOI)}</td>
+                        <td>${escapeHtml(item.temp)}</td>
+                        <td>${escapeHtml(item.humidity)}</td>
+                        <td><span class="result-tag ${tagClass}">${escapeHtml(item.result_text)}</span></td>
+                    </tr>
+                `;
+            })
+            .join("");
+
+        batchTableBody.innerHTML = html;
+        batchTableWrapper.classList.remove("hidden");
+        if (rows.length > maxRenderRows) {
+            batchErrorBox.textContent = `结果行较多，仅展示前 ${maxRenderRows} 条，完整统计已在汇总中给出。`;
+            batchErrorBox.classList.add("show");
         }
     };
 
@@ -126,7 +203,7 @@
         submitBtn.textContent = "预测中...";
 
         try {
-            const response = await fetch(predictUrl, {
+            const response = await fetch(simplePredictUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -158,4 +235,61 @@
             submitBtn.textContent = "提交预测";
         }
     });
+
+    if (batchPredictUrl) {
+        batchSubmitBtn.addEventListener("click", async () => {
+            const file = batchInput.files?.[0];
+            if (!file) {
+                setBatchSummary("请先选择 CSV 文件。", "error");
+                return;
+            }
+
+            setBatchErrors([]);
+            renderBatchTable([]);
+            batchSubmitBtn.disabled = true;
+            batchSubmitBtn.textContent = "处理中...";
+
+            try {
+                const formData = new FormData();
+                formData.append("csv_file", file);
+
+                const response = await fetch(batchPredictUrl, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: formData,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    data = {};
+                }
+
+                if (!response.ok || !data.ok) {
+                    setBatchSummary(data.message || "批量预测失败，请稍后重试。", "error");
+                    setBatchErrors(data.errors || []);
+                    return;
+                }
+
+                const summary = data.summary || {};
+                const summaryText =
+                    `批量预测完成：总计 ${summary.total_rows ?? "-"} 行，` +
+                    `有效 ${summary.valid_rows ?? "-"} 行，` +
+                    `错误 ${summary.error_rows ?? "-"} 行，` +
+                    `需要灌溉 ${summary.need_irrigation ?? "-"} 行，` +
+                    `一切正常 ${summary.normal ?? "-"} 行。`;
+                setBatchSummary(summaryText, "ok");
+                setBatchErrors(data.errors || []);
+                renderBatchTable(data.results || []);
+            } catch (error) {
+                setBatchSummary("网络异常，请稍后重试。", "error");
+            } finally {
+                batchSubmitBtn.disabled = false;
+                batchSubmitBtn.textContent = "上传并预测";
+            }
+        });
+    }
 })();
