@@ -447,6 +447,17 @@ body {
     gap: 10px;
 }
 
+.bottom-note {
+    margin-top: 16px;
+    text-align: center;
+    color: #648274;
+}
+
+.bottom-note p {
+    margin: 4px 0;
+    font-size: 12px;
+}
+
 @media (max-width: 900px) {
     .module-grid {
         grid-template-columns: 1fr;
