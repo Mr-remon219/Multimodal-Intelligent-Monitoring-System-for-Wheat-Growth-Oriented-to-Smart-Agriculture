@@ -1,0 +1,53 @@
+{% load static %}
+
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>用户注册 - 小麦生长智能监测系统</title>
+        <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+        <script
+            src="{% static 'js/register.js' %}"
+            defer
+            data-api-url="{% url 'register_api' %}"
+            data-login-url="{% url 'log_index' %}"
+        ></script>
+    </head>
+    <body>
+        <main class="login-page">
+            <section class="login-card">
+                <h1 class="title">小麦生长智能监测系统</h1>
+                <p class="subtitle">用户注册</p>
+
+                <p id="register-message" class="message" aria-live="polite"></p>
+
+                <form id="register-form" class="login-form" novalidate>
+                    {% csrf_token %}
+
+                    <label for="username">用户名</label>
+                    <input id="username" name="username" type="text" maxlength="20" required />
+
+                    <label for="password">密码</label>
+                    <input id="password" name="password" type="password" maxlength="20" required />
+
+                    <label for="confirm-password">确认密码</label>
+                    <input
+                        id="confirm-password"
+                        name="confirm_password"
+                        type="password"
+                        maxlength="20"
+                        required
+                    />
+
+                    <button id="register-submit" type="submit">注册</button>
+                </form>
+
+                <p class="switch-tip">
+                    已有账号？
+                    <a href="{% url 'log_index' %}" class="switch-link">返回登录</a>
+                </p>
+            </section>
+        </main>
+    </body>
+</html>

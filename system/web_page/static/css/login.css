@@ -67,6 +67,31 @@ body {
     font-size: 14px;
 }
 
+.message {
+    display: none;
+    margin: 0 0 14px 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.message.show {
+    display: block;
+}
+
+.message.error {
+    border-color: var(--error-border);
+    background: var(--error-bg);
+    color: var(--error-text);
+}
+
+.message.success {
+    border-color: #b9dfcc;
+    background: #edf9f2;
+    color: #1f7a54;
+}
+
 .login-form {
     display: flex;
     flex-direction: column;
@@ -108,4 +133,25 @@ body {
 
 .login-form button:hover {
     background: var(--button-hover);
+}
+
+.login-form button:disabled {
+    cursor: not-allowed;
+    opacity: 0.78;
+}
+
+.switch-tip {
+    margin: 14px 0 0 0;
+    text-align: center;
+    font-size: 14px;
+}
+
+.switch-link {
+    color: #1d6f4d;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.switch-link:hover {
+    text-decoration: underline;
 }
