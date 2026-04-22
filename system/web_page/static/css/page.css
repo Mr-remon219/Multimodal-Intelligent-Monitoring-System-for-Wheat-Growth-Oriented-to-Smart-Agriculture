@@ -81,6 +81,18 @@ body {
     color: var(--topbar-hover);
 }
 
+.nav-btn {
+    border: 1px solid rgba(239, 249, 244, 0.8);
+    border-radius: 8px;
+    padding: 4px 12px;
+    background: rgba(239, 249, 244, 0.08);
+}
+
+.nav-btn:hover {
+    border-color: var(--topbar-hover);
+    background: rgba(188, 229, 212, 0.12);
+}
+
 .container {
     max-width: 1280px;
     margin: 0 auto;
