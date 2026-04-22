@@ -26,6 +26,7 @@
                     {% if login_user_name %}
                     <span class="nav-link">当前用户：{{ login_user_name }}</span>
                     {% endif %}
+                    <a class="nav-link" href="{% url 'settings_index' %}">设置</a>
                     <a class="nav-link" href="{% url 'log_index' %}">切换账号</a>
                 </div>
             </div>

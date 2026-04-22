@@ -1,0 +1,245 @@
+:root {
+    --topbar-bg: #083b2f;
+    --topbar-link: #eff9f4;
+    --topbar-hover: #bce5d4;
+    --page-bg: #edf3ef;
+    --card-bg: #ffffff;
+    --line: #d6e2db;
+    --accent: #126a49;
+    --accent-hover: #0f593e;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: #1d2a24;
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 8% 8%, rgba(145, 199, 171, 0.2), transparent 28%),
+        var(--page-bg);
+}
+
+.topbar {
+    height: 60px;
+    background: var(--topbar-bg);
+    border-bottom: 1px solid #0f4f3f;
+}
+
+.topbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.left-group,
+.right-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand {
+    color: var(--topbar-link);
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.nav-text {
+    color: var(--topbar-link);
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.nav-link {
+    color: var(--topbar-link);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.nav-link:hover {
+    color: var(--topbar-hover);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+}
+
+.page-header {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #f8fdfb;
+    padding: 20px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 26px;
+    color: #144735;
+}
+
+.page-header p {
+    margin: 8px 0 0;
+    color: #3a5d4f;
+}
+
+.message {
+    margin-top: 14px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.message.success {
+    border: 1px solid #b4dfc6;
+    background: #edf9f2;
+    color: #1f6f4d;
+}
+
+.message.error {
+    border: 1px solid #f2c0c6;
+    background: #fdeff1;
+    color: #b72436;
+}
+
+.grid {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card-bg);
+    padding: 18px;
+}
+
+.card h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    color: #194b38;
+}
+
+form {
+    display: grid;
+    gap: 8px;
+}
+
+label {
+    font-size: 14px;
+    color: #2c5143;
+}
+
+input {
+    height: 40px;
+    border: 1px solid #b8ccc2;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 14px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #16734f;
+    box-shadow: 0 0 0 3px rgba(22, 115, 79, 0.15);
+}
+
+button {
+    margin-top: 8px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--accent-hover);
+}
+
+.sensor-box {
+    margin-top: 16px;
+    border: 1px dashed #c0d3ca;
+    border-radius: 12px;
+    background: #f8fcfa;
+    padding: 14px;
+}
+
+.sensor-box h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #2f5648;
+}
+
+.sensor-box code {
+    display: inline-block;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #eef4f1;
+    color: #29493d;
+}
+
+.schema-box {
+    margin-top: 14px;
+    border: 1px solid #d4e0d9;
+    border-radius: 12px;
+    background: #fbfdfc;
+    padding: 14px;
+}
+
+.schema-box h3,
+.schema-box h4 {
+    margin: 0 0 8px;
+    color: #224b3c;
+}
+
+.schema-box h4 {
+    margin-top: 12px;
+    font-size: 15px;
+}
+
+.schema-box p {
+    margin: 8px 0 6px;
+    color: #355a4c;
+    font-size: 14px;
+}
+
+.schema-box code {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #eef4f1;
+    color: #29493d;
+    word-break: break-all;
+}
+
+.schema-box pre {
+    margin: 8px 0 0;
+    padding: 10px;
+    border-radius: 8px;
+    background: #eef4f1;
+    color: #29493d;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

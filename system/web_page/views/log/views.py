@@ -1,10 +1,12 @@
 
 import json
 
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 from ...models.users import User
+from ...sensor_storage import ensure_user_sensor_table
 
 
 @require_http_methods(["GET", "POST"])
@@ -86,5 +88,14 @@ def register_api(request):
             status=409,
         )
 
-    User.objects.create(user_name=username, password=password)
+    try:
+        with transaction.atomic():
+            user = User.objects.create(user_name=username, password=password)
+            ensure_user_sensor_table(user.id)
+    except Exception:
+        return JsonResponse(
+            {"ok": False, "message": "注册失败，请稍后重试。"},
+            status=500,
+        )
+
     return JsonResponse({"ok": True, "message": "注册成功，即将跳转登录页。"})

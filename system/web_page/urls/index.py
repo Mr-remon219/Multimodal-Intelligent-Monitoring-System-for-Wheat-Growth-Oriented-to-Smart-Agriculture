@@ -6,4 +6,5 @@ urlpatterns = [
         path("log/", include("web_page.urls.log.index")),
         path("settings/", include("web_page.urls.settings.index")),
         path("main/", include("web_page.urls.main.index")),
+        path("sensor/", include("web_page.urls.sensor.index")),
         ]
