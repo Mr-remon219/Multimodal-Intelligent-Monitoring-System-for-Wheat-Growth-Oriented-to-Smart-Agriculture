@@ -23,8 +23,17 @@
                 <div class="left-group">
                     <a class="brand" href="{% url 'main_page' %}">小麦生长智能监测系统</a>
                     <span class="nav-link nav-muted">智能灌溉决策模块</span>
+                    <button
+                        id="mobile-nav-toggle"
+                        class="mobile-nav-toggle"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="topbar-right-group"
+                    >
+                        菜单
+                    </button>
                 </div>
-                <div class="right-group">
+                <div id="topbar-right-group" class="right-group">
                     {% if login_user_name %}
                     <span class="nav-link">当前用户：{{ login_user_name }}</span>
                     {% endif %}

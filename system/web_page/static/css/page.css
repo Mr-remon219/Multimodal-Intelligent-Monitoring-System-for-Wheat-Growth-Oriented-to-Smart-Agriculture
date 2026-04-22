@@ -39,7 +39,7 @@ body {
 }
 
 .topbar {
-    height: 60px;
+    min-height: 60px;
     background: var(--topbar-bg);
     border-bottom: 1px solid #0f4f3f;
     box-shadow: 0 4px 14px rgba(8, 42, 33, 0.22);
@@ -47,7 +47,7 @@ body {
 
 .topbar-inner {
     max-width: 1280px;
-    height: 100%;
+    min-height: 60px;
     margin: 0 auto;
     padding: 0 18px;
     display: flex;
@@ -93,6 +93,23 @@ body {
 }
 
 .nav-btn:hover {
+    border-color: var(--topbar-hover);
+    background: rgba(188, 229, 212, 0.12);
+}
+
+.mobile-nav-toggle {
+    display: none;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid rgba(239, 249, 244, 0.8);
+    border-radius: 8px;
+    background: rgba(239, 249, 244, 0.08);
+    color: var(--topbar-link);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.mobile-nav-toggle:hover {
     border-color: var(--topbar-hover);
     background: rgba(188, 229, 212, 0.12);
 }
@@ -298,6 +315,7 @@ body {
     border-radius: 10px;
     background: #fbfdfc;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
     max-height: 320px;
 }
 
@@ -603,14 +621,103 @@ body {
 }
 
 @media (max-width: 900px) {
+    .topbar {
+        min-height: 68px;
+    }
+
+    .topbar-inner {
+        min-height: 68px;
+        padding: 8px 14px;
+        height: auto;
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    .left-group,
+    .right-group {
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .right-group {
+        margin-left: auto;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .brand {
+        font-size: 17px;
+    }
+
+    .nav-link {
+        font-size: 13px;
+    }
+
     .module-grid {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 640px) {
+    .topbar {
+        min-height: auto;
+    }
+
     .topbar-inner {
-        padding: 0 12px;
+        min-height: auto;
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .left-group,
+    .right-group {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .right-group {
+        justify-content: flex-start;
+    }
+
+    .right-group span.nav-link {
+        width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .left-group {
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand {
+        white-space: normal;
+        line-height: 1.35;
+    }
+
+    .nav-muted {
+        display: none;
+    }
+
+    .mobile-nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .topbar-inner.mobile-nav-enabled .right-group {
+        display: none;
+    }
+
+    .topbar-inner.mobile-nav-enabled.mobile-nav-open .right-group {
+        display: flex;
+    }
+
+    .container {
+        padding: 18px 12px 32px;
     }
 
     .hero {
@@ -630,9 +737,21 @@ body {
         align-items: flex-start;
     }
 
+    .module-head h2 {
+        font-size: 20px;
+    }
+
     .action-btn,
     .ghost-btn {
         width: 100%;
+    }
+
+    .batch-table-wrapper {
+        max-height: 280px;
+    }
+
+    .batch-table {
+        min-width: 620px;
     }
 
     .form-actions {
@@ -646,6 +765,23 @@ body {
 
     .batch-page-info {
         min-width: 0;
+    }
+
+    .modal-dialog {
+        width: calc(100vw - 16px);
+        max-height: calc(100vh - 16px);
+        margin: 8px auto;
+        border-radius: 12px;
+        padding: 18px 14px 14px;
+    }
+
+    .modal-dialog h2 {
+        font-size: 22px;
+    }
+
+    .close-btn {
+        right: 8px;
+        top: 8px;
     }
 
     .sensor-live-content {
@@ -662,5 +798,43 @@ body {
     .sensor-live-left {
         border-right: 0;
         border-bottom: 1px solid #d6e2db;
+    }
+}
+
+@media (max-width: 420px) {
+    .brand {
+        font-size: 16px;
+    }
+
+    .module-card {
+        padding: 14px;
+    }
+
+    .module-head h2 {
+        font-size: 18px;
+    }
+
+    .module-desc {
+        font-size: 13px;
+    }
+
+    .result-panel {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .batch-table {
+        min-width: 560px;
+    }
+
+    .batch-table th,
+    .batch-table td {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .sensor-live-left,
+    .sensor-live-right {
+        padding: 12px;
     }
 }
