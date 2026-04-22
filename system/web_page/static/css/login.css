@@ -25,10 +25,11 @@ body {
 
 .login-page {
     min-height: 100vh;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 20px 20px 72px;
     background:
         linear-gradient(var(--bg-overlay), var(--bg-overlay)),
         url("../image/backend.jpg") center center / cover no-repeat;
@@ -154,4 +155,19 @@ body {
 
 .switch-link:hover {
     text-decoration: underline;
+}
+
+.bottom-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    text-align: center;
+    color: rgba(239, 249, 244, 0.92);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.bottom-note p {
+    margin: 3px 0;
+    font-size: 12px;
 }

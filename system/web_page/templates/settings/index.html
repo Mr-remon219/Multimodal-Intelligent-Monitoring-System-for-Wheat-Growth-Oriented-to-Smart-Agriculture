@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>设置 - 小麦生长智能监测系统</title>
         <link rel="stylesheet" href="{% static 'css/settings.css' %}" />
+        <script src="{% static 'js/settings.js' %}" defer></script>
     </head>
     <body>
         <header class="topbar">
@@ -14,8 +15,17 @@
                 <div class="left-group">
                     <a class="brand" href="{% url 'main_page' %}">小麦生长智能监测系统</a>
                     <span class="nav-text">账号设置</span>
+                    <button
+                        id="mobile-nav-toggle"
+                        class="mobile-nav-toggle"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="topbar-right-group"
+                    >
+                        菜单
+                    </button>
                 </div>
-                <div class="right-group">
+                <div id="topbar-right-group" class="right-group">
                     {% if login_user_name %}
                     <span class="nav-text">当前用户：{{ login_user_name }}</span>
                     {% endif %}
@@ -106,6 +116,11 @@
   "temp": 26.4,
   "humidity": 71.8
 }</pre>
+            </section>
+
+            <section class="bottom-note">
+                <p>正在陆续开发其他功能...</p>
+                <p>当前版本v2.1</p>
             </section>
         </main>
     </body>
