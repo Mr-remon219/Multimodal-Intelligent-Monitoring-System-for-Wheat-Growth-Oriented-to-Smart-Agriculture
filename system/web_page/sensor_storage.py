@@ -9,14 +9,15 @@ def get_user_sensor_table_name(user_id):
 
 def ensure_user_sensor_table(user_id):
     table_name = get_user_sensor_table_name(user_id)
+    quoted_table_name = connection.ops.quote_name(table_name)
     create_sql = f"""
-    CREATE TABLE IF NOT EXISTS "{table_name}" (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS {quoted_table_name} (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
         soil_type VARCHAR(20) NOT NULL,
         seedling_stage VARCHAR(20) NOT NULL,
-        moi REAL NOT NULL,
-        temp REAL NOT NULL,
-        humidity REAL NOT NULL,
+        moi DOUBLE NOT NULL,
+        temp DOUBLE NOT NULL,
+        humidity DOUBLE NOT NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
     """
@@ -27,8 +28,9 @@ def ensure_user_sensor_table(user_id):
 
 def insert_user_sensor_record(user_id, payload):
     table_name = ensure_user_sensor_table(user_id)
+    quoted_table_name = connection.ops.quote_name(table_name)
     insert_sql = f"""
-    INSERT INTO "{table_name}" (soil_type, seedling_stage, moi, temp, humidity)
+    INSERT INTO {quoted_table_name} (soil_type, seedling_stage, moi, temp, humidity)
     VALUES (%s, %s, %s, %s, %s)
     """
 
@@ -49,9 +51,10 @@ def insert_user_sensor_record(user_id, payload):
 
 def fetch_latest_user_sensor_record(user_id):
     table_name = ensure_user_sensor_table(user_id)
+    quoted_table_name = connection.ops.quote_name(table_name)
     query_sql = f"""
     SELECT id, soil_type, seedling_stage, moi, temp, humidity, created_at
-    FROM "{table_name}"
+    FROM {quoted_table_name}
     ORDER BY id DESC
     LIMIT 1
     """

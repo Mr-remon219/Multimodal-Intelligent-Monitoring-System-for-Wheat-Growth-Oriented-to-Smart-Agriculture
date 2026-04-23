@@ -8,15 +8,16 @@ def create_sensor_tables_for_existing_users(apps, schema_editor):
     with schema_editor.connection.cursor() as cursor:
         for user_id in user_model.objects.values_list("id", flat=True):
             table_name = f"user_sensor_data_{int(user_id)}"
+            quoted_table_name = schema_editor.quote_name(table_name)
             cursor.execute(
                 f"""
-                CREATE TABLE IF NOT EXISTS "{table_name}" (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                CREATE TABLE IF NOT EXISTS {quoted_table_name} (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     soil_type VARCHAR(20) NOT NULL,
                     seedling_stage VARCHAR(20) NOT NULL,
-                    moi REAL NOT NULL,
-                    temp REAL NOT NULL,
-                    humidity REAL NOT NULL,
+                    moi DOUBLE NOT NULL,
+                    temp DOUBLE NOT NULL,
+                    humidity DOUBLE NOT NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
