@@ -2,8 +2,8 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from ...models.users import User, generate_sensor_key
+from ...models.sensor_storage import ensure_user_sensor_table
 from ...prediction_schema import PREDICTION_FIELDS, SEEDLING_STAGE_OPTIONS, SOIL_OPTIONS
-from ...sensor_storage import ensure_user_sensor_table
 
 
 @require_http_methods(["GET", "POST"])

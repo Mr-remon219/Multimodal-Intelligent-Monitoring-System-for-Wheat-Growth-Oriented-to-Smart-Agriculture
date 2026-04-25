@@ -3,9 +3,9 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
+from ...models.sensor_storage import insert_user_sensor_record
 from ...models.users import User
 from ...prediction_schema import validate_prediction_payload
-from ...sensor_storage import insert_user_sensor_record
 
 
 @require_http_methods(["POST"])

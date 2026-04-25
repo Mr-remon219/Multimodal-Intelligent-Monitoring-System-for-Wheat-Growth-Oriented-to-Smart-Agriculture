@@ -8,7 +8,7 @@ from pathlib import Path
 from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
-from ...sensor_storage import fetch_latest_user_sensor_record
+from ...models.sensor_storage import fetch_latest_user_sensor_record
 
 SOIL_OPTIONS = {"黑土地", "河淤土", "沙土地", "红泥巴土", "黏泥巴"}
 SEEDLING_STAGE_OPTIONS = {"发芽", "长根", "青麦", "授粉", "变黄", "逐渐成熟", "收割"}

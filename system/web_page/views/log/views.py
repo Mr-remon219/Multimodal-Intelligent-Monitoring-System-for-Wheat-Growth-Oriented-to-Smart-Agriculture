@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 from ...models.users import User
-from ...sensor_storage import ensure_user_sensor_table
+from ...models.sensor_storage import ensure_user_sensor_table
 
 
 @require_http_methods(["GET", "POST"])
